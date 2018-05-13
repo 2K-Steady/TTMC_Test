@@ -237,16 +237,17 @@ ButtonSoloStart:
 		
 		;===============스테미나 부족 시===============;
 		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\11_SteminaEnd.bmp
-		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
+		if ((ErrorLevel = 0) && (soloStart = true))
 		{
 			Sleep, 2000
 			;스테미나 부족 화면 노출 시 취소 버튼 클릭 
 				ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\11_2_SteminaCancel.bmp
-				if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
+				if ((ErrorLevel = 0) && (soloStart = true))
 				{
 					Send {Click %FoundX% %FoundY%}
 					Sleep, 1000		;ms 단위 시간
 					soloStart := false
+					isPlaying := false
 					msgbox, 0, 안내, 스테미너가 부족합니다. 매크로가 자동 정지됩니다.,
 				}
 		}
