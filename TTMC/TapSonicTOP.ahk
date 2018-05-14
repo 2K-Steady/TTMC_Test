@@ -144,10 +144,11 @@ ButtonSoloStart:
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			Sleep, 1000		
 			Gui,Submit,NoHide
 			GuiControl, , logBox, 게임레벨 누름
 			GuiControl, , D, Next버튼 찾는중..
+			Sleep, 3000		
+
 		}
 		
 		;===============Next 버튼===============;
@@ -190,7 +191,7 @@ ButtonSoloStart:
 		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\7_StageEnd1.bmp
 		if ((ErrorLevel = 0) && (soloStart = true))
 		{
-			Sleep, 3000
+			Sleep, 2000 ;화면전환간 터치가 안먹히는 문제를 해결하기 위해 쿨타임 추가 
 			Send {Click %FoundX% %FoundY%}
 			Sleep, 1000		
 			Gui,Submit,NoHide
@@ -204,21 +205,35 @@ ButtonSoloStart:
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			Sleep, 1000		
+			Sleep, 3000		
 			Gui,Submit,NoHide
 			GuiControl, , logBox, 스코어 누름
 			GuiControl, , D, 노래종료 시퀀스_2
 		}
 		
-		;===============EXP 부분 클릭===============;
-		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\9_StageEnd3.bmp
+		;===============EXP 부분 클릭 (모든 캐릭 만렙)===============;
+		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *70 %A_ScriptDir%\SoloPlayImage\MaxLevel.bmp
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
-			Send {Click %FoundX% %FoundY%}
 			Sleep, 1000		
 			Gui,Submit,NoHide
-			GuiControl, , logBox, producer 누름
+			GuiControl, , logBox, 모든 캐릭 만렙 확인
 			GuiControl, , D, 노래종료 시퀀스_3
+			msgbox, 0, 안내, 모든 캐릭터 레벨이 MAX입니다.,
+			soloStart := false
+		}
+		else
+		{
+			;===============EXP 부분 클릭===============;
+			ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\9_StageEnd3.bmp
+			if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
+			{
+				Send {Click %FoundX% %FoundY%}
+				Sleep, 1000		
+				Gui,Submit,NoHide
+				GuiControl, , logBox, producer 누름
+				GuiControl, , D, 노래종료 시퀀스_3
+			}
 		}
 		
 		;===============스테이지 재시작 클릭===============;
