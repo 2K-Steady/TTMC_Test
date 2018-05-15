@@ -16,14 +16,11 @@ isPlaying := false
 
 return
 
-ButtonSoloStart:
-{
-	Gui,Submit,NoHide
-	GuiControl, , A, 솔로 동작중
-	GuiControl, , D, Start버튼눌림 
-	soloStart := true
-	클리어횟수 := 0
-	
+SoloPlay()
+{	
+	global soloStart
+	global isPlaying
+	global 클리어횟수
 	
 	Loop
 	{
@@ -263,15 +260,27 @@ ButtonSoloStart:
 		
 		
 		
-		
+		;===============매크로 정지 함수===============;
 		if(soloStart = false)
 		{
 			break
 		}
 	}
 }
-return
 
+
+
+ButtonSoloStart:
+{
+	Gui,Submit,NoHide
+	GuiControl, , A, 솔로 동작중
+	GuiControl, , D, Start버튼눌림 
+	soloStart := true
+	클리어횟수 := 0
+	
+	SoloPlay()
+}
+return
 
 ButtonRankStart:
 {
