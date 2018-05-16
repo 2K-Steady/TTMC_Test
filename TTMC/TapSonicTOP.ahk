@@ -1,17 +1,21 @@
 ﻿
-Gui, Add, Text, x85 y5 w110 h20, TTMC Test ver.0.1	; 프로그램 제목
-;Gui, Add, ListBox, x12 y19 w150 h100 vlogBox,
+Gui, Add, Text, x180 y5 w200 h20, TTMC Test ver.180516		; 프로그램 제목
+Gui, Add, Text, x380 y260 w130 h15, Made by: KinKan_Lab		; --
 
-Gui, Add, ListView, x180 y19 w300 h150, 시간 | 내용  ;디버깅용 Log ListView
+Gui, Add, Picture ,x20 y26 w150 h150, %A_ScriptDir%\TTMC_Icon.ico
+Gui, Add, ListView, x180 y25 w330 h150 Grid SortDesc hwndid, 시간 | 내용  	;디버깅용 Log ListView
 Lv_modifyCol(1,130)
-Lv_modifycol(2,165)
-Gui, Add, Text, x70 y120 w100 h20 vA, 준비!!		 	; 현재 상태를 표시할 텍스트
-Gui, Add, Text, x70 y140 h20 w50 vB, 0 회			; 스테이지 클리어 횟수를 표시할 텍스트
-Gui, Add, Button, x30 y160 w110 h20, SoloStart		; 솔로 스타트 버튼
-Gui, Add, Button, x30 y180 w110 h20, RankStart		; 랭크 스타트 버튼
-Gui, Add, Button, x30 y200 w110 h20, 정지_F4			; 정지 버튼 
-Gui, Add, Button, x30 y220 w110 h20, 종료			; 프로그램 종료 버튼
-Gui, Add, Text, x30 y260 w200 h20 vD, 현재상태  	; 현재 상태 확인
+Lv_modifycol(2,196)
+Gui, Add, Text, x30 y190 w150 h20 vA, Ready!!		 	; 현재 상태를 표시할 텍스트
+Gui, Add, Text, x30 y210 w150 h20 vB, MacroCount: 0 회	; 스테이지 클리어 횟수를 표시할 텍스트
+Gui, Add, Button, x180 y180 w110 h20, SoloStart			; 솔로 스타트 버튼
+Gui, Add, Text, x300 y185 w50 h20, 횟수: 
+Gui, Add, Edit, x335 y180 w30 h20 vRepeatCount, 0		; 반복 횟수 설정 
+Gui, Add, Checkbox, x400 y180 w110 h20 vCheckLevel, LevelMAX 무시	; 솔로 카운트 제어 
+Gui, Add, Button, x180 y200 w110 h20, RankStart			; 랭크 스타트 버튼
+Gui, Add, Button, x180 y220 w110 h20, 정지_F4			; 정지 버튼 
+Gui, Add, Button, x180 y240 w110 h20, 종료				; 프로그램 종료 버튼
+Gui, Add, Text, x30 y260 w200 h15 vD, 현재상태: None  	; 현재 상태 확인
 Gui, Show
 
 매크로시작 := false
@@ -19,16 +23,16 @@ global soloStart := false
 global isPlaying := false
 global 클리어횟수 := 0
 global timeLine
+global CheckLevel
+global RepeatCount := 0
 
 return
 
 SoloPlay()
 {	
 	
-	Loop
-	{
 		;===============메인화면===============;
-		ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *70 %A_ScriptDir%\SoloPlayImage\0_SoloNoneSelect.bmp
+		ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *120 %A_ScriptDir%\SoloPlayImage\0_SoloNoneSelect.bmp
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			;ImageSearch 함수에서 FoundX, FoundY좌표를 받아서 Send함수로 보내줌;
@@ -240,7 +244,7 @@ SoloPlay()
 			Gui,Submit,nohide
 			;GuiControl, , logBox, Start버튼 누름
 			GuiControl, , D, 노래가 진행중입니다..
-			GuiControl, , B, %클리어횟수% 회
+			GuiControl, , B, MacroCount: %클리어횟수% 회
 			isPlaying := true
 		}
 		
@@ -270,15 +274,15 @@ SoloPlay()
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"Score 클릭")
 			
-			Sleep, 3000		
+			Sleep, 4000		
 			Gui,Submit,NoHide
 			;GuiControl, , logBox, 스코어 누름
 			GuiControl, , D, 노래종료 시퀀스_2
 		}
 		
 		;===============EXP 부분 클릭 (모든 캐릭 만렙)===============;
-		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *70 %A_ScriptDir%\SoloPlayImage\MaxLevel.bmp
-		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
+		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *100 %A_ScriptDir%\SoloPlayImage\MaxLevel.bmp
+		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false) && (CheckLevel = 0))
 		{
 			Sleep, 1000		
 			
@@ -287,6 +291,7 @@ SoloPlay()
 			
 			Gui,Submit,NoHide
 			;GuiControl, , logBox, 모든 캐릭 만렙 확인
+			GuiControl, , A, 매크로 정지
 			GuiControl, , D, 노래종료 시퀀스_3
 			msgbox, 0, 안내, 모든 캐릭터 레벨이 MAX입니다.,
 			soloStart := false
@@ -323,7 +328,7 @@ SoloPlay()
 			Gui,Submit,nohide
 			;GuiControl, , logBox, Restart 누름
 			GuiControl, , D, 노래를 재시작합니다.
-			GuiControl, , B, %클리어횟수% 회
+			GuiControl, , B, MacroCount: %클리어횟수% 회
 			isPlaying := true
 		}
 		
@@ -344,37 +349,66 @@ SoloPlay()
 			
 			
 		}
-		
-		
-		
-		;===============매크로 정지===============;
-		if(soloStart = false)
-		{
-			break
-		}
-	}
+
 }
 
-
+;=============================================================================
+;==============================버튼 부분=======================================
+;=============================================================================
 
 ButtonSoloStart:
 {
 	Gui,Submit,NoHide
 	GuiControl, , A, 솔로 매크로 동작중
 	GuiControl, , D, Start버튼눌림 
+	
+	timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+	Lv_Add("",timeLine,"솔로 매크로 시작")
+	
 	soloStart := true
 	
-	SoloPlay()
+	if(RepeatCount = 0)
+	{
+		Loop
+		{
+			;===============매크로 정지===============;
+			if(soloStart = false)
+			{
+				break
+			}
+			SoloPlay()
+		}
+	}
+	else if(RepeatCount > 0)
+	{
+		while(RepeatCount > 클리어횟수)
+		{
+			;===============버튼 강제 정지============;
+			if(soloStart = false)
+			{
+				break
+			}
+			;========================================
+				
+			SoloPlay()
+		}
+		if(RepeatCount = 클리어횟수)
+		{
+			soloStart := false
+			Gui,Submit,NoHide
+			GuiControl, , A, 정지
+			GuiControl, , D, 현재상태: 정지
+			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+			Lv_Add("",timeLine,"지정횟수 달성, 매크로 정지")
+			msgbox, 0, 안내, 지정된 횟수에 도달했습니다. 매크로 정지.,
+		}
+	}
 }
 return
 
 ButtonRankStart:
 {
-	Gui,Submit,NoHide
-	GuiControl, , A, 랭크 동작중
-	매크로시작 := true
-	클리어횟수 := 0
-
+	msgbox, 48, 고멘나사이, ※공사중※, 
 }
 return
 
@@ -392,6 +426,15 @@ Button종료:
 	
 }
 return
+
+GuiClose:
+ExitApp
+
+;=============================================================================
+;=============================================================================
+;=============================================================================
+
+
 ;================키보드 단축키================;
 
 F4::
@@ -408,6 +451,8 @@ MacroStop()
 	매크로시작 := false
 	Gui,Submit,NoHide
 	GuiControl, , A, 정지
+	GuiControl, , D, 현재상태: 정지
 	timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 	Lv_Add("",timeLine,"매크로 정지 시도")
+	
 }
