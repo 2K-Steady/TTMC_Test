@@ -12,8 +12,11 @@ Gui, Add, Button, x180 y180 w110 h20, SoloStart			; 솔로 스타트 버튼
 Gui, Add, Text, x300 y185 w50 h20, 횟수: 
 Gui, Add, Edit, x335 y180 w30 h20 vRepeatCount, 0		; 반복 횟수 설정 
 Gui, Add, Checkbox, x400 y180 w110 h20 vCheckLevel, LevelMAX 무시	; 솔로 카운트 제어 
+
 Gui, Add, Button, x180 y200 w110 h20, RankStart			; 랭크 스타트 버튼
-Gui, Add, Button, x180 y220 w110 h20, 정지_F4			; 정지 버튼 
+
+Gui, Add, Button, x300 y220 w110 h20, 캐릭터판매		; 캐릭터 판매 기능 
+Gui, Add, Button, x180 y220 w110 h20, 정지_F4			; 정지 버튼
 Gui, Add, Button, x180 y240 w110 h20, 종료				; 프로그램 종료 버튼
 Gui, Add, Text, x30 y260 w200 h15 vD, 현재상태: None  	; 현재 상태 확인
 Gui, Show
@@ -25,6 +28,8 @@ global 클리어횟수 := 0
 global timeLine
 global CheckLevel
 global RepeatCount := 0
+
+global sellStart := false
 
 return
 
@@ -248,6 +253,9 @@ SoloPlay()
 			isPlaying := true
 		}
 		
+		;==================멤버 초과시=================;
+		InvenFull()
+		
 		;===============플레이 보상 클릭===============;
 		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\7_StageEnd1.bmp
 		if ((ErrorLevel = 0) && (soloStart = true))
@@ -360,7 +368,7 @@ ButtonSoloStart:
 {
 	Gui,Submit,NoHide
 	GuiControl, , A, 솔로 매크로 동작중
-	GuiControl, , D, Start버튼눌림 
+	GuiControl, , D, Start버튼눌림
 	
 	timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 	Lv_Add("",timeLine,"솔로 매크로 시작")
@@ -412,6 +420,14 @@ ButtonRankStart:
 }
 return
 
+Button캐릭터판매:
+{
+	sellStart:= true
+	
+	SellCharacter()
+}
+return
+
 Button정지_F4:
 {
 	MacroStop()
@@ -421,6 +437,7 @@ return
 Button종료:
 {	
 	soloStart := false
+	sellStart := false
 	매크로시작 := false
 	ExitApp
 	
@@ -445,10 +462,184 @@ return
 
 ;============================================;
 
+
+
+SellCharacter()
+{
+	timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+	Lv_Add("",timeLine,"캐릭터 판매 기능 시작")
+	Gui,Submit,NoHide
+	GuiControl, , A, 캐릭터 판매 시퀀스 작동
+	
+	Loop
+	{
+		if(sellStart = false)
+			break
+		
+		SellMain()
+		SellStartRoom()
+		SellInventory()
+		SellInventorySort()
+		SellFire()
+		SellFindCharacter()
+		
+		
+	}
+	
+}
+
+SellMain()
+{ 
+	;===============메인화면 ManageMent 클릭===============;
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *100 %A_ScriptDir%\SellImage\1_Main_ManageMent.bmp
+	if ((ErrorLevel = 0) && (sellStart = true))
+	{
+		Send {Click %FoundX% %FoundY%}
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"ManageMent 버튼 클릭")
+		Gui,Submit,NoHide
+		GuiControl, , D, ManageMent 버튼 클릭 
+		
+		Sleep, 1000		;ms 단위 시간
+	}
+	
+}
+
+SellStartRoom()
+{
+	;===============메인화면 Star Room 클릭===============;
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\SellImage\2.Main_StarRoom.bmp
+	if ((ErrorLevel = 0) && (sellStart = true))
+	{
+		Send {Click %FoundX% %FoundY%}
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"StarRoom 버튼 클릭")
+		Gui,Submit,NoHide
+		GuiControl, , D, StarRoom 진입 
+		
+		Sleep, 1000		;ms 단위 시간
+	}
+}
+
+SellInventory()
+{
+	;===============Inventory 클릭===============;
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\SellImage\3.Inventory.bmp
+	if ((ErrorLevel = 0) && (sellStart = true))
+	{
+		Send {Click %FoundX% %FoundY%}
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"스타 목록 버튼 클릭")
+		Gui,Submit,NoHide
+		GuiControl, , D, 스타 목록 진입 
+		
+		Sleep, 1000		;ms 단위 시간
+	}
+}
+
+SellInventorySort()
+{
+	;===============기본 정렬===============;
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\SellImage\4.Sort_Default.bmp
+	if ((ErrorLevel = 0) && (sellStart = true))
+	{
+		Send {Click %FoundX% %FoundY%}
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"기본 정렬 클릭")
+		Gui,Submit,NoHide
+		GuiControl, , D, 기본 정렬 
+		
+		Sleep, 1000		;ms 단위 시간
+	}
+	
+	;===============레벨 정렬===============;
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\SellImage\5.Sort_Level.bmp
+	if ((ErrorLevel = 0) && (sellStart = true))
+	{
+		Send {Click %FoundX% %FoundY%}
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"레벨 정렬 클릭")
+		Gui,Submit,NoHide
+		GuiControl, , D, 레벨 정렬로 변경
+		
+		Sleep, 1000		;ms 단위 시간
+	}
+	
+	;===============정렬 순서 변경===============;
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\SellImage\6.Sort_Change.bmp
+	if ((ErrorLevel = 0) && (sellStart = true))
+	{
+		Send {Click %FoundX% %FoundY%}
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"정렬 순서 클릭")
+		Gui,Submit,NoHide
+		GuiControl, , D, 정렬 순서 변경 
+		
+		Sleep, 1000		;ms 단위 시간
+	}
+	
+}
+
+SellFire()
+{
+	;===============일괄 해고 버튼===============;
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\SellImage\8_Fire.bmp
+	if ((ErrorLevel = 0) && (sellStart = true))
+	{
+		Send {Click %FoundX% %FoundY%}
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"댄서 캐릭 클릭")
+		Gui,Submit,NoHide
+		GuiControl, , D, 댄서 s1 Find
+		
+		Sleep, 1000		;ms 단위 시간
+	}
+}
+
+SellFindCharacter()
+{
+	;===============댄서 캐릭 찾기===============;
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *100 %A_ScriptDir%\SellImage\dancer_s1.bmp
+	if ((ErrorLevel = 0) && (sellStart = true))
+	{
+		Send {Click %FoundX% %FoundY%}
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"댄서 캐릭 클릭")
+		Gui,Submit,NoHide
+		GuiControl, , D, 댄서 s1 Find
+		
+		Sleep, 1000		;ms 단위 시간
+	}
+}
+
+InvenFull()
+{
+	;===============InvenFull===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\6_2_InvenFull.bmp
+	if ((ErrorLevel = 0) && (soloStart = true))
+	{
+		클리어횟수 := 클리어횟수 - 1
+		MacroStop()
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"스타목록Full로 인한 매크로 정지.")
+		msgbox, 0, 매크로 정지 알림, 스타목록을 비워주세요 :),
+	}
+		
+}
+
 MacroStop()
 {
 	soloStart := false
 	매크로시작 := false
+	sellStart := false
 	Gui,Submit,NoHide
 	GuiControl, , A, 정지
 	GuiControl, , D, 현재상태: 정지
