@@ -35,6 +35,9 @@ global currentTime
 global pastTime
 global testTime := A_TickCount
 
+global programStop := false
+
+global blueStackPower := true
 
 return
 
@@ -205,7 +208,7 @@ SoloPlay()
 		}
 		
 		;===============노래 난이도 선택===============;
-		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\3_RankSelect.bmp
+		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *70 %A_ScriptDir%\SoloPlayImage\3_RankSelect.bmp
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
@@ -216,7 +219,7 @@ SoloPlay()
 			Gui,Submit,NoHide
 			;GuiControl, , logBox, 게임레벨 누름
 			GuiControl, , D, Next버튼 찾는중..
-			Sleep, 3000	
+			Sleep, 2000	
 			
 
 		}
@@ -345,6 +348,9 @@ SoloPlay()
 			
 		}
 		
+		;==================Mission Clear=================;
+		MissionClear()
+		
 		;===============스테이지 재시작 클릭===============;
 		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\10_StageRestart.bmp
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
@@ -357,7 +363,6 @@ SoloPlay()
 			Sleep, 1000		;ms 단위 시간
 			클리어횟수 := 클리어횟수 + 1
 			Gui,Submit,nohide
-			;GuiControl, , logBox, Restart 누름
 			GuiControl, , D, 노래를 재시작합니다.
 			GuiControl, , B, MacroCount: %클리어횟수% 회
 			isPlaying := true
@@ -418,6 +423,7 @@ ButtonSoloStart:
 				CheckTime()
 			}
 		}
+		
 	}
 	else if(RepeatCount > 0)
 	{
@@ -519,8 +525,7 @@ SellCharacter()
 		SellInventorySort()
 		SellFire()
 		SellFindCharacter()
-		
-		
+				
 	}
 	
 }
@@ -672,6 +677,26 @@ InvenFull()
 	
 }
 
+MissionClear()
+{
+	;===============MissionClear===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\MissionClear.bmp
+	if ((ErrorLevel = 0) && (soloStart = true))
+	{
+		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\MissionClear_2.bmp
+		if ((ErrorLevel = 0) && (soloStart = true))
+		{
+			Send {Click %FoundX% %FoundY%}
+			testTime := A_TickCount
+			
+			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+			Lv_Add("",timeLine,"미션 클리어 화면 체크 .")
+			Gui,Submit,nohide
+			GuiControl, , D, 노래종료 시퀀스_4
+		}
+	}
+}
+
 MacroStop()
 {
 	soloStart := false
@@ -696,7 +721,78 @@ CheckTime()
 		MacroStop()
 		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 		Lv_Add("",timeLine,"프로그램 미 반응으로 인한 자동 정지.")
-		msgbox, 0, 안내,마우스 미 반응으로 인해 5초후 프로그램 재가동.. ,5
 		testTime := A_TickCount
+		
+		programStop := true
 	}
+}
+
+;BlueStackOff()
+{
+	;===============BlueStackOff===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *30 %A_ScriptDir%\BlueStackOff\BlueStackOff_1.bmp
+	if ((ErrorLevel = 0) && (soloStart = false))
+	{
+		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *30 %A_ScriptDir%\BlueStackOff\BlueStackOff_2.bmp
+		if ((ErrorLevel = 0) && (soloStart = false))
+		{
+			Send {Click %FoundX% %FoundY%}
+			Sleep, 1000
+			
+			ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *30 %A_ScriptDir%\BlueStackOff\BlueStackOff_3.bmp
+			if ((ErrorLevel = 0) && (soloStart = false))
+			{
+				Send {Click %FoundX% %FoundY%}
+				Sleep, 1000
+				
+				timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+				Lv_Add("",timeLine,"블루스택을 종료합니다 .")
+				msgbox, 0, 안내,마우스 미 반응으로 인해 10초후 프로그램 재가동.. ,10
+				Gui,Submit,nohide
+				GuiControl, , A, 정지
+				GuiControl, , D, 블루스택 종료,
+				
+				programStop := false
+				blueStackPower := false
+			}
+		}
+	}
+}
+
+;BlueStackOn()
+{
+	;===============BlueStackOn===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_1.bmp
+	if ((ErrorLevel = 0) && (blueStackPower = false))
+	{
+		Send {Click 2 %FoundX% %FoundY%}
+		Sleep, 30000
+	}
+	
+	;===============BlueStackOn_2===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_2.bmp
+	if ((ErrorLevel = 0) && (blueStackPower = false))
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+	}
+	
+	;===============BlueStackOn_3===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *70 %A_ScriptDir%\BlueStackOn\BlueStackOn_3.bmp
+	if ((ErrorLevel = 0) && (blueStackPower = false))
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 40000
+	}
+	
+	;===============BlueStackOn_4===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_4.bmp
+	if ((ErrorLevel = 0) && (blueStackPower = false))
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		blueStackPower := true
+	}
+	
 }
