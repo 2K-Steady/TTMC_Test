@@ -31,26 +31,32 @@ global RepeatCount := 0
 
 global sellStart := false
 
+global currentTime
+global pastTime
+global testTime := A_TickCount
+
+
 return
 
 SoloPlay()
 {	
-	
+		
 		;===============메인화면===============;
 		ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *120 %A_ScriptDir%\SoloPlayImage\0_SoloNoneSelect.bmp
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			;ImageSearch 함수에서 FoundX, FoundY좌표를 받아서 Send함수로 보내줌;
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"Soloplay 버튼을 찾고있습니다..")
 			
 			Sleep, 1000		
+			
 			Gui,Submit,NoHide
-
 			;GuiControl, , logBox, Soloplay버튼 찾는중
 			GuiControl, , D, Soloplay 버튼을 찾고있습니다..
+			
 		}
 		
 		;===============솔로 플레이 시작===============;
@@ -58,7 +64,7 @@ SoloPlay()
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"Soloplay 버튼을 클릭..")
 			
@@ -66,6 +72,7 @@ SoloPlay()
 			Gui,Submit,NoHide
 			;GuiControl, , logBox, Soloplay진입
 			GuiControl, , D, 정렬 버튼을 찾고있습니다..
+			
 		}
 		
 		;===============정렬 종류 버튼===============;
@@ -73,7 +80,7 @@ SoloPlay()
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"정렬 버튼을 클릭..")
 			
@@ -87,22 +94,24 @@ SoloPlay()
 			if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 			{
 				Send {Click %FoundX% %FoundY%}
-				
-			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
-			Lv_Add("",timeLine,"곡이름을 기준으로 재정렬")
+				testTime := A_TickCount
+				timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+				Lv_Add("",timeLine,"곡이름을 기준으로 재정렬")
 			
 				Sleep, 1000		
 				Gui,Submit,NoHide
 				;GuiControl, , logBox, 곡 이름 누름
 				GuiControl, , D, 유온미 앨범커버 찾는중..
+
 			}
+			
 		}
 		
 		ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\SoloPlayImage\2_1_SortHistory.bmp
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"정렬 버튼을 클릭..")
 			
@@ -116,15 +125,17 @@ SoloPlay()
 			if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 			{
 				Send {Click %FoundX% %FoundY%}
-				
+				testTime := A_TickCount
 				timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 				Lv_Add("",timeLine,"곡이름을 기준으로 재정렬")
 				
 				Sleep, 1000		
 				Gui,Submit,NoHide
 				;GuiControl, , logBox, 곡 이름 누름
-				GuiControl, , D, 유온미 앨범커버 찾는중..				
+				GuiControl, , D, 유온미 앨범커버 찾는중..		
+
 			}
+			
 		}
 		
 		ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\SoloPlayImage\2_1_SortMission.bmp
@@ -132,7 +143,7 @@ SoloPlay()
 		{
 			Send {Click %FoundX% %FoundY%}
 			Sleep, 1000
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"정렬 버튼을 클릭..")
 			
@@ -145,7 +156,7 @@ SoloPlay()
 			if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 			{
 				Send {Click %FoundX% %FoundY%}
-				
+				testTime := A_TickCount
 				timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 				Lv_Add("",timeLine,"곡이름을 기준으로 재정렬")
 				
@@ -153,7 +164,9 @@ SoloPlay()
 				Gui,Submit,NoHide
 				;GuiControl, , logBox, 곡 이름 누름
 				GuiControl, , D, 유온미 앨범커버 찾는중..
+				
 			}
+			
 		}
 		
 		
@@ -164,7 +177,7 @@ SoloPlay()
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"정렬 순서 변경")
 			
@@ -172,6 +185,7 @@ SoloPlay()
 			Gui,Submit,NoHide
 			;GuiControl, , logBox, 정렬순서 버튼 누름
 			GuiControl, , D, 유온미 앨범커버 찾는중..
+			
 		}
 		
 		;===============앨범 이미지 클릭===============;
@@ -179,7 +193,7 @@ SoloPlay()
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"유온미 노래 확인")
 			
@@ -187,6 +201,7 @@ SoloPlay()
 			Gui,Submit,NoHide
 			;GuiControl, , logBox, 앨범커버 누름
 			GuiControl, , D, 게임 난이도를 선택중..
+			
 		}
 		
 		;===============노래 난이도 선택===============;
@@ -194,14 +209,15 @@ SoloPlay()
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"Easy 난이도 설정")
 			
 			Gui,Submit,NoHide
 			;GuiControl, , logBox, 게임레벨 누름
 			GuiControl, , D, Next버튼 찾는중..
-			Sleep, 3000		
+			Sleep, 3000	
+			
 
 		}
 		
@@ -210,7 +226,7 @@ SoloPlay()
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"Next 클릭")
 			
@@ -218,6 +234,7 @@ SoloPlay()
 			Gui,Submit,NoHide
 			;GuiControl, , logBox, Next버튼 누름
 			GuiControl, , D, AutoPlay 찾는중..
+			
 		}
 		
 		;===============오토 플레이 선택===============;
@@ -225,7 +242,7 @@ SoloPlay()
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"오토 플레이 설정")
 			
@@ -233,6 +250,7 @@ SoloPlay()
 			Gui,Submit,NoHide
 			;GuiControl, , logBox, AutoPlay 누름
 			GuiControl, , D, 노래 시작 찾는중..
+			
 		}
 		
 		;===============노래 시작===============;
@@ -240,7 +258,7 @@ SoloPlay()
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"노래 시작")
 			
@@ -251,6 +269,7 @@ SoloPlay()
 			GuiControl, , D, 노래가 진행중입니다..
 			GuiControl, , B, MacroCount: %클리어횟수% 회
 			isPlaying := true
+			
 		}
 		
 		;==================멤버 초과시=================;
@@ -271,6 +290,7 @@ SoloPlay()
 			;GuiControl, , logBox, 플레이보상 누름
 			GuiControl, , D, 노래종료 시퀀스_1
 			isPlaying := false
+			
 		}
 		
 		;===============SCORE 클릭===============;
@@ -278,7 +298,7 @@ SoloPlay()
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"Score 클릭")
 			
@@ -286,6 +306,7 @@ SoloPlay()
 			Gui,Submit,NoHide
 			;GuiControl, , logBox, 스코어 누름
 			GuiControl, , D, 노래종료 시퀀스_2
+			
 		}
 		
 		;===============EXP 부분 클릭 (모든 캐릭 만렙)===============;
@@ -303,6 +324,7 @@ SoloPlay()
 			GuiControl, , D, 노래종료 시퀀스_3
 			msgbox, 0, 안내, 모든 캐릭터 레벨이 MAX입니다.,
 			soloStart := false
+
 		}
 		else
 		{
@@ -311,7 +333,7 @@ SoloPlay()
 			if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 			{
 				Send {Click %FoundX% %FoundY%}
-				
+				testTime := A_TickCount
 				timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 				Lv_Add("",timeLine,"EXP 확인 단계 ")
 				
@@ -320,6 +342,7 @@ SoloPlay()
 				;GuiControl, , logBox, producer 누름
 				GuiControl, , D, 노래종료 시퀀스_3
 			}
+			
 		}
 		
 		;===============스테이지 재시작 클릭===============;
@@ -327,7 +350,7 @@ SoloPlay()
 		if ((ErrorLevel = 0) && (soloStart = true) && (isPlaying = false))
 		{
 			Send {Click %FoundX% %FoundY%}
-			
+			testTime := A_TickCount
 			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 			Lv_Add("",timeLine,"스테이지를 재시작 합니다.")
 			
@@ -338,6 +361,7 @@ SoloPlay()
 			GuiControl, , D, 노래를 재시작합니다.
 			GuiControl, , B, MacroCount: %클리어횟수% 회
 			isPlaying := true
+			
 		}
 		
 		;===============스테미나 부족 시===============;
@@ -366,9 +390,11 @@ SoloPlay()
 
 ButtonSoloStart:
 {
+
 	Gui,Submit,NoHide
 	GuiControl, , A, 솔로 매크로 동작중
 	GuiControl, , D, Start버튼눌림
+
 	
 	timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 	Lv_Add("",timeLine,"솔로 매크로 시작")
@@ -384,7 +410,13 @@ ButtonSoloStart:
 			{
 				break
 			}
+			
 			SoloPlay()
+			
+			if(soloStart = true)
+			{
+				CheckTime()
+			}
 		}
 	}
 	else if(RepeatCount > 0)
@@ -399,6 +431,11 @@ ButtonSoloStart:
 			;========================================
 				
 			SoloPlay()
+			
+			if(soloStart = true)
+			{
+				CheckTime()
+			}
 		}
 		if(RepeatCount = 클리어횟수)
 		{
@@ -632,7 +669,7 @@ InvenFull()
 		Lv_Add("",timeLine,"스타목록Full로 인한 매크로 정지.")
 		msgbox, 0, 매크로 정지 알림, 스타목록을 비워주세요 :),
 	}
-		
+	
 }
 
 MacroStop()
@@ -646,4 +683,20 @@ MacroStop()
 	timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 	Lv_Add("",timeLine,"매크로 정지 시도")
 	
+}
+
+CheckTime()
+{
+	currentTime := A_TickCount			;현재 시각 받아옴  ; TickCount -> 1/1000초  ex) 5초 == 5000
+	pastTime := currentTime - testTime	; 마지막 시각으로 부터 지나간 시각 계산 
+	
+	if(pastTime >= 180000)
+	{
+		Gui,Submit,NoHide
+		MacroStop()
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"프로그램 미 반응으로 인한 자동 정지.")
+		msgbox, 0, 안내,마우스 미 반응으로 인해 5초후 프로그램 재가동.. ,5
+		testTime := A_TickCount
+	}
 }
