@@ -1,5 +1,5 @@
 ﻿
-Gui, Add, Text, x180 y5 w200 h20, TTMC Test ver.180516		; 프로그램 제목
+Gui, Add, Text, x180 y5 w200 h20, TTMC Test ver.180522		; 프로그램 제목
 Gui, Add, Text, x380 y260 w130 h15, Made by: KinKan_Lab		; --
 
 Gui, Add, Picture ,x20 y26 w150 h150, %A_ScriptDir%\TTMC_Icon.ico
@@ -10,18 +10,22 @@ Gui, Add, Text, x30 y190 w150 h20 vA, Ready!!		 	; 현재 상태를 표시할 �
 Gui, Add, Text, x30 y210 w150 h20 vB, MacroCount: 0 회	; 스테이지 클리어 횟수를 표시할 텍스트
 Gui, Add, Button, x180 y180 w110 h20, SoloStart			; 솔로 스타트 버튼
 Gui, Add, Text, x300 y185 w50 h20, 횟수: 
-Gui, Add, Edit, x335 y180 w30 h20 vRepeatCount, 0		; 반복 횟수 설정 
+Gui, Add, Edit, x335 y180 w30 h20 vRepeatCount, 0		; 반복 횟수 설정
+;Gui, Add, Edit, x520 y25 w100 h20 vInputNumber, 0 ; 시리얼 넘버 입력칸
+;Gui, Add, Button, x570 y50 w50 h20, Login
+
 Gui, Add, Checkbox, x400 y180 w110 h20 vCheckLevel, LevelMAX 무시	; 솔로 카운트 제어 
 
 Gui, Add, Button, x180 y200 w110 h20, RankStart			; 랭크 스타트 버튼
 
-Gui, Add, Button, x300 y220 w110 h20, 캐릭터판매		; 캐릭터 판매 기능 
+Gui, Add, Button, x300 y220 w110 h20, 캐릭터판매			; 캐릭터 판매 기능 
 Gui, Add, Button, x180 y220 w110 h20, 정지_F4			; 정지 버튼
 Gui, Add, Button, x180 y240 w110 h20, 종료				; 프로그램 종료 버튼
 Gui, Add, Text, x30 y260 w200 h15 vD, 현재상태: None  	; 현재 상태 확인
+
+;Gui, Add, Button, x50 y5 w100 h20, DoNotPress 			;임의기능 테스트 버튼 
 Gui, Show
 
-매크로시작 := false
 global soloStart := false
 global isPlaying := false
 global 클리어횟수 := 0
@@ -38,6 +42,8 @@ global testTime := A_TickCount
 global programStop := false
 
 global blueStackPower := true
+
+global SerialCheck := false
 
 return
 
@@ -381,7 +387,6 @@ SoloPlay()
 			soloStart := false
 			isPlaying := false
 			GuiControl, , D, -매크로 정지-
-			SoundPlay, %A_ScriptDir%\Sound\CautionSound.mp3, 
 			msgbox, 0, 안내, 스테미너가 부족합니다. 매크로가 자동 정지됩니다.,
 			
 			
@@ -395,7 +400,12 @@ SoloPlay()
 
 ButtonSoloStart:
 {
-
+	;if(SerialCheck = false)
+	;{
+	;	msgbox, 0, 안내, 해당 기능을 사용할 수 없습니다,
+	;	ExitApp
+	;}
+		
 	Gui,Submit,NoHide
 	GuiControl, , A, 솔로 매크로 동작중
 	GuiControl, , D, Start버튼눌림
@@ -423,7 +433,6 @@ ButtonSoloStart:
 				CheckTime()
 			}
 		}
-		
 	}
 	else if(RepeatCount > 0)
 	{
@@ -443,6 +452,7 @@ ButtonSoloStart:
 				CheckTime()
 			}
 		}
+		
 		if(RepeatCount = 클리어횟수)
 		{
 			soloStart := false
@@ -454,6 +464,25 @@ ButtonSoloStart:
 			msgbox, 0, 안내, 지정된 횟수에 도달했습니다. 매크로 정지.,
 		}
 	}
+	while(programStop = true)
+	{
+		BlueStackOff()
+	}
+}
+return
+
+ButtonLogin:
+{
+	global InputNumber := 30
+	
+	InputSerialNumber := InputNumber
+	
+	if(InputSerialNumber <= 0)
+	{
+		msgbox, 0, 안내, 시리얼 넘버를 정확히 입력해주세요.,
+		;return
+	}
+	CheckSerialNumber(InputSerialNumber)
 }
 return
 
@@ -465,9 +494,10 @@ return
 
 Button캐릭터판매:
 {
-	sellStart:= true
+	msgbox, 48, 고멘나사이, ※공사중※,
+	;sellStart:= true
 	
-	SellCharacter()
+	;SellCharacter()
 }
 return
 
@@ -487,6 +517,13 @@ Button종료:
 }
 return
 
+ButtonDoNotPress:
+{
+	;BlueStackOn()
+	;TestOn()
+}
+return
+
 GuiClose:
 ExitApp
 
@@ -500,6 +537,20 @@ ExitApp
 F4::
 {
 	MacroStop()
+}
+
+F5::
+{
+	msgbox, 0, ,F5버튼클릭 확인,1
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_1.bmp
+	if ((ErrorLevel = 0))
+	{
+		MouseMove,%FoundX%,%FoundY%
+		Sleep, 1000
+		MouseClick,left
+		Sleep, 1000
+	}
+	
 }
 return
 
@@ -700,7 +751,6 @@ MissionClear()
 MacroStop()
 {
 	soloStart := false
-	매크로시작 := false
 	sellStart := false
 	Gui,Submit,NoHide
 	GuiControl, , A, 정지
@@ -715,7 +765,7 @@ CheckTime()
 	currentTime := A_TickCount			;현재 시각 받아옴  ; TickCount -> 1/1000초  ex) 5초 == 5000
 	pastTime := currentTime - testTime	; 마지막 시각으로 부터 지나간 시각 계산 
 	
-	if(pastTime >= 180000)
+	if(pastTime >= 180000) ;180초  
 	{
 		Gui,Submit,NoHide
 		MacroStop()
@@ -727,72 +777,142 @@ CheckTime()
 	}
 }
 
-;BlueStackOff()
+BlueStackOff()
 {
-	;===============BlueStackOff===============;
-	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *30 %A_ScriptDir%\BlueStackOff\BlueStackOff_1.bmp
-	if ((ErrorLevel = 0) && (soloStart = false))
-	{
-		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *30 %A_ScriptDir%\BlueStackOff\BlueStackOff_2.bmp
-		if ((ErrorLevel = 0) && (soloStart = false))
+	WinKill, BlueStacks
+	Sleep, 1000
+	
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\BlueStackOff\BlueStackOff.bmp
+	if (ErrorLevel = 0)
 		{
+			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+			Lv_Add("",timeLine,"에러로 인한 블루스택 종료시퀀스 진입.")
+			Run, %A_ScriptDir%\Sound\Caution.swf, 
+			msgbox, 0, 안내,프로그램 미 반응으로 인해 10초후 프로그램 재가동... ,10
+			
 			Send {Click %FoundX% %FoundY%}
 			Sleep, 1000
 			
-			ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *30 %A_ScriptDir%\BlueStackOff\BlueStackOff_3.bmp
-			if ((ErrorLevel = 0) && (soloStart = false))
-			{
-				Send {Click %FoundX% %FoundY%}
-				Sleep, 1000
-				
-				timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
-				Lv_Add("",timeLine,"블루스택을 종료합니다 .")
-				msgbox, 0, 안내,마우스 미 반응으로 인해 10초후 프로그램 재가동.. ,10
-				Gui,Submit,nohide
-				GuiControl, , A, 정지
-				GuiControl, , D, 블루스택 종료,
-				
-				programStop := false
-				blueStackPower := false
-			}
+			Gui,Submit,nohide
+			GuiControl, , A, 정지
+			GuiControl, , D, 블루스택 종료,
+			
+			programStop := false
+			blueStackPower := false
+			
+			Sleep, 10000
 		}
-	}
 }
 
-;BlueStackOn()
+BlueStackOn()
 {
-	;===============BlueStackOn===============;
-	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_1.bmp
-	if ((ErrorLevel = 0) && (blueStackPower = false))
+	IfWinNotExist, BlueStacks
 	{
-		Send {Click 2 %FoundX% %FoundY%}
+		Run, C:\ProgramData\BlueStacks\Client\BlueStacks.exe
 		Sleep, 30000
 	}
 	
-	;===============BlueStackOn_2===============;
-	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_2.bmp
-	if ((ErrorLevel = 0) && (blueStackPower = false))
-	{
-		Send {Click %FoundX% %FoundY%}
-		Sleep, 1000
-	}
+	CoordMode, Pixel, Screen
+	WinGetPos, pos_x, pos_y, width, height, BlueStacks
+	x_right := width + pos_x
+	y_bottom := height + pos_y
 	
-	;===============BlueStackOn_3===============;
-	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *70 %A_ScriptDir%\BlueStackOn\BlueStackOn_3.bmp
-	if ((ErrorLevel = 0) && (blueStackPower = false))
-	{
-		Send {Click %FoundX% %FoundY%}
-		Sleep, 40000
-	}
+	blueStackPower := true
 	
-	;===============BlueStackOn_4===============;
-	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_4.bmp
-	if ((ErrorLevel = 0) && (blueStackPower = false))
+	While(programStop = false)
 	{
-		Send {Click %FoundX% %FoundY%}
-		Sleep, 1000
+		;================나의 앱 클릭===============;
+		ImageSearch, FoundX, FoundY, %pos_x%, %pos_y%, %x_right%, %y_bottom%, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_1.bmp
+		if(ErrorLevel = 0)
+		{
+			
+			msgbox, 0, ,if 진입1,1
+			MouseMove,%FoundX%,%FoundY%
+			Sleep, 1000
+			MouseClick,left
+			Sleep, 1000
+			BackGroundClick(FoundX, FoundY)
+		}
+	
+		;================탭소닉 아이콘 클릭===============;
+		ImageSearch, FoundX, FoundY, %pos_x%, %pos_y%, %x_right%, %y_bottom%, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_2.bmp
+		if(ErrorLevel = 0)
+		{
+			msgbox, 0, ,if 진입2,1
+			BackGroundClick(FoundX, FoundY)
+			
+			programStop := true
+		}
 		
-		blueStackPower := true
+		if(Emergency = true)
+		{
+			break
+		}
 	}
+
+}
+
+TestOn()
+{
+	IfWinNotExist, BlueStacks
+	{
+		Run, C:\ProgramData\BlueStacks\Client\BlueStacks.exe
+		Sleep, 30000
+	}
+	
+
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_1.bmp
+	if ((ErrorLevel = 0))
+	{
+		MouseMove,%FoundX%,%FoundY%
+		Sleep, 1000
+		MouseClick,left
+		Sleep, 1000
+	}
+	
+	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_2.bmp
+	if ((ErrorLevel = 0))
+	{
+		MouseMove,%FoundX%,%FoundY%
+		Sleep, 1000
+		MouseClick,left
+		Sleep, 1000
+	}
+	
+	blueStackPower := true
+	
+}
+
+BackGroundClick(posX, posY)
+{
+	msgbox, 0, ,%posX%  %posY%,2
+	WinGetPos, w_x, w_y, w_w, w_h, BlueStacks
+	
+	innerX := posX
+	innerY := posY
+	
+	lparam := innerX|innerY<<16
+	PostMessage, 0x200, 0, %lparam%, ,BlueStacks
+	PostMessage, 0x201, 1, %lparam%, ,BlueStacks
+	PostMessage, 0x202, 0, %lparam%, ,BlueStacks
+	Sleep, 1000
+}
+
+CheckSerialNumber(InputSerialNumber)
+{
+	msgbox, 0, , 입력숫자 %InputSerialNumber%,
+	URLDownloadToFile, http://blogattach.naver.net/4edb52e2f7a3aa7659bedbe5d332483794c530d2cd/20180522_47_blogfile/koi1397_1526923726546_u69o35_txt/123912873.txt, SAVE.txt
+	FileRead,text,SAVE.txt
+	IfInString,text,%InputSerialNumber%
+	{
+		MsgBox, 0, ,시리얼넘버 확인 성공!,1
+		SerialCheck = true
+	}
+	else
+	{
+		MsgBox, 0, ,등록되지 않은 유저입니다.,
+		SerialCheck = false
+	}
+	
 	
 }
