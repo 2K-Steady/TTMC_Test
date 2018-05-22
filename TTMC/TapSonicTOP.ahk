@@ -37,11 +37,10 @@ global sellStart := false
 
 global currentTime
 global pastTime
-global testTime := A_TickCount
+global testTime := A_TickCount							;마우스 클릭 마지막 틱 저장변수
 
-global programStop := false
-
-global blueStackPower := true
+global programStop := false								;매크로 프로그램 동작여부 체크 
+global blueStackPower := true							;블루스택 프로그램 OnOff 체크 
 
 global SerialCheck := false
 
@@ -405,7 +404,8 @@ ButtonSoloStart:
 	;	msgbox, 0, 안내, 해당 기능을 사용할 수 없습니다,
 	;	ExitApp
 	;}
-		
+
+
 	Gui,Submit,NoHide
 	GuiControl, , A, 솔로 매크로 동작중
 	GuiControl, , D, Start버튼눌림
@@ -431,6 +431,14 @@ ButtonSoloStart:
 			if(soloStart = true)
 			{
 				CheckTime()
+			}
+			while(programStop = true && blueStackPower = true)
+			{
+				BlueStackOff()
+			}
+			while(programStop = false && blueStackPower = false)
+			{
+				BlueStackOn()
 			}
 		}
 	}
@@ -463,10 +471,6 @@ ButtonSoloStart:
 			Lv_Add("",timeLine,"지정횟수 달성, 매크로 정지")
 			msgbox, 0, 안내, 지정된 횟수에 도달했습니다. 매크로 정지.,
 		}
-	}
-	while(programStop = true)
-	{
-		BlueStackOff()
 	}
 }
 return
@@ -751,12 +755,13 @@ CheckTime()
 	currentTime := A_TickCount			;현재 시각 받아옴  ; TickCount -> 1/1000초  ex) 5초 == 5000
 	pastTime := currentTime - testTime	; 마지막 시각으로 부터 지나간 시각 계산 
 	
-	if(pastTime >= 180000) ;180초  
+	if(pastTime >= 200000) ;200초  
 	{
 		Gui,Submit,NoHide
 		MacroStop()
 		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 		Lv_Add("",timeLine,"프로그램 미 반응으로 인한 자동 정지.")
+		msgbox, 0, 디버깅, 마지막 클릭으로 부터 %pastTime%/1000 초 경과,3
 		testTime := A_TickCount
 		
 		programStop := true
@@ -770,34 +775,49 @@ BlueStackOff()
 	
 	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\BlueStackOff\BlueStackOff.bmp
 	if (ErrorLevel = 0)
-		{
-			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
-			Lv_Add("",timeLine,"에러로 인한 블루스택 종료시퀀스 진입.")
-			Run, %A_ScriptDir%\Sound\Caution.swf, 
-			msgbox, 0, 안내,프로그램 미 반응으로 인해 10초후 프로그램 재가동... ,10
-			
-			Send {Click %FoundX% %FoundY%}
-			Sleep, 1000
-			
-			Gui,Submit,nohide
-			GuiControl, , A, 정지
-			GuiControl, , D, 블루스택 종료,
-			
-			programStop := false
-			blueStackPower := false
-			
-			Sleep, 10000
-		}
+	{
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"에러로 인한 블루스택 종료시퀀스 진입.")
+		msgbox, 0, 안내,프로그램 미 반응으로 인해 10초후 프로그램 재가동... ,10
+		
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		Gui,Submit,nohide
+		GuiControl, , A, 정지
+		GuiControl, , D, 블루스택 종료,
+		
+		programStop := false
+		blueStackPower := false
+		
+		Sleep, 20000		;대략적인 프로그램 종료 시간 (평균 10~15초) 
+	}
+	
 }
 
 BlueStackOn()
 {
+	
 	IfNotExist, BlueStacks
 	{
+		msgbox, 0,안내, 블루스택을 재실행합니다.,2
 		Run,  %A_ScriptDir%\TapSonic_B.lnk
-		Sleep, 30000
+		Sleep, 60000
+		blueStackPower := true
+		
+		Loop
+		{
+			ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\BlueStackOn\EventClose.bmp
+			if (ErrorLevel = 0)
+			{
+				Send {Click %FoundX% %FoundY%}
+				Sleep, 1000
+				soloStart := true
+				break
+			}
+		}
 	}
-	blueStackPower := true
+	
 
 }
 
