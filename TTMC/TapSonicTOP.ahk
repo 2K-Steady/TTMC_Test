@@ -1,5 +1,5 @@
 ﻿
-Gui, Add, Text, x180 y5 w200 h20, TTMC Test ver.180522		; 프로그램 제목
+Gui, Add, Text, x180 y5 w200 h20, TTMC Test ver.180523		; 프로그램 제목
 Gui, Add, Text, x380 y260 w130 h15, Made by: KinKan_Lab		; --
 
 Gui, Add, Picture ,x20 y26 w150 h150, %A_ScriptDir%\TTMC_Icon.ico
@@ -11,10 +11,14 @@ Gui, Add, Text, x30 y210 w150 h20 vB, MacroCount: 0 회	; 스테이지 클리어
 Gui, Add, Button, x180 y180 w110 h20, SoloStart			; 솔로 스타트 버튼
 Gui, Add, Text, x300 y185 w50 h20, 횟수: 
 Gui, Add, Edit, x335 y180 w30 h20 vRepeatCount, 0		; 반복 횟수 설정
-;Gui, Add, Edit, x520 y25 w100 h20 vInputNumber, 0 ; 시리얼 넘버 입력칸
-;Gui, Add, Button, x570 y50 w50 h20, Login
 
-Gui, Add, Checkbox, x400 y180 w110 h20 vCheckLevel, LevelMAX 무시	; 솔로 카운트 제어 
+Gui, Add, Text, x520 y30 w100 h20, 인증 번호 입력
+Gui, Add, Edit, x520 y45 w100 h20 vInputNumber, 0 		; 시리얼 넘버 입력칸
+Gui, Add, Button, x570 y70 w50 h20, Login				; 로그인 버튼
+Gui, Add, Text, x520 y100 w100 h20 vUserName,
+
+Gui, Add, Checkbox, x400 y180 w110 h20 vCheckLevel, LevelMAX 무시	; 솔로 카운트 제어
+Gui, Add, Checkbox, x400 y200 w120 h20 vStaminaBuy, Stamina 자동구매
 
 Gui, Add, Button, x180 y200 w110 h20, RankStart			; 랭크 스타트 버튼
 
@@ -30,21 +34,26 @@ global soloStart := false
 global isPlaying := false
 global rankStart := false
 
+global rankAutoCheck := false
+
 global 클리어횟수 := 0
 global timeLine
 global CheckLevel
 global RepeatCount := 0
 
+global StaminaBuy
+
 global sellStart := false
 
 global currentTime
 global pastTime
-global testTime := A_TickCount							;마우스 클릭 마지막 틱 저장변수
+global testTime := 9999999999							;마우스 클릭 마지막 틱 저장변수
+
 
 global programStop := false								;매크로 프로그램 동작여부 체크 
 global blueStackPower := true							;블루스택 프로그램 OnOff 체크 
 
-global SerialCheck := false
+global serialCheck := false
 
 return
 
@@ -390,7 +399,6 @@ SoloPlay()
 			GuiControl, , D, -매크로 정지-
 			msgbox, 0, 안내, 스테미너가 부족합니다. 매크로가 자동 정지됩니다.,
 			
-			
 		}
 
 }
@@ -400,13 +408,13 @@ SoloPlay()
 ;=============================================================================
 
 ButtonSoloStart:
-{
-	;if(SerialCheck = false)
-	;{
-	;	msgbox, 0, 안내, 해당 기능을 사용할 수 없습니다,
-	;	ExitApp
-	;}
-
+{	
+	if(serialCheck = false)
+	{
+		msgbox, 0, 안내, 비인가 인원은 해당 기능을 사용할 수 없습니다.,
+		ExitApp
+	}
+	global testTime := A_TickCount	
 
 	Gui,Submit,NoHide
 	GuiControl, , A, 솔로 매크로 동작중
@@ -479,14 +487,13 @@ return
 
 ButtonLogin:
 {
-	global InputNumber := 30
-	
+	Gui,Submit,NoHide
 	InputSerialNumber := InputNumber
 	
 	if(InputSerialNumber <= 0)
 	{
 		msgbox, 0, 안내, 시리얼 넘버를 정확히 입력해주세요.,
-		;return
+		return
 	}
 	CheckSerialNumber(InputSerialNumber)
 }
@@ -494,6 +501,13 @@ return
 
 ButtonRankStart:
 {
+	if(serialCheck = false)
+	{
+		msgbox, 0, 안내, 비인가 인원은 해당 기능을 사용할 수 없습니다.,
+		ExitApp
+	}
+	global testTime := A_TickCount
+	
 	Gui,Submit,NoHide
 	GuiControl, , A, 랭크 매크로 동작중
 	GuiControl, , D, RankStart버튼눌림
@@ -504,8 +518,47 @@ ButtonRankStart:
 	
 	rankStart := true
 	
+	
 	while(rankStart = true)
 	{
+		if(RepeatCount = 0)
+		{
+			RankPlay()
+			if(rankStart = true)
+			{
+				CheckTime()
+			}
+		}
+		else if(RepeatCount > 0)
+		{
+			if(RepeatCount = 클리어횟수)
+			{
+
+				rankStart := false
+				Gui,Submit,NoHide
+				GuiControl, , A, 정지
+				GuiControl, , D, 현재상태: 정지
+				timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+				Lv_Add("",timeLine,"지정횟수 달성, 매크로 정지")
+				msgbox, 0, 안내, 지정된 횟수에 도달했습니다. 매크로 정지.,
+			}
+			RankPlay()
+			if(rankStart = true)
+			{
+				CheckTime()
+			}
+			
+		}
+		
+		while(programStop = true && blueStackPower = true)
+		{
+			BlueStackOff()
+		}
+		
+		if(programStop = false && blueStackPower = false)
+		{
+			BlueStackOn()
+		}
 		
 	} ;while(rankStart)
 }
@@ -563,6 +616,161 @@ return
 
 RankPlay()
 {
+	;CoordMode, Pixel, Screen
+	;WinGetPos, pos_x, pos_y, width, height, BlueStacks
+	;x_right := width + pos_x
+	;y_bottom := height + pos_y
+	
+	;================Grand Prix 버튼================;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\RankPlayImage\Rank1.bmp
+	if(ErrorLevel = 0)
+	{
+		;BackGroundClick(FoundX, FoundY)
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		Gui,Submit,NoHide
+		GuiControl, , D, Rank Mode 버튼 찾는중 
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"Grand Prix 버튼 클릭")
+	}
+	
+	;================Rank Mode 버튼================;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\RankPlayImage\Rank2.bmp
+	if(ErrorLevel = 0)
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		Gui,Submit,NoHide
+		GuiControl, , D, Today's Song 찾는중 
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"Rank Mode 버튼 클릭")
+	}
+	
+	;================Today's Song 찾기================;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\RankPlayImage\Rank3.bmp
+	if(ErrorLevel = 0)
+	{
+		FoundX := FoundX + 240
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		Gui,Submit,NoHide
+		GuiControl, , D, 오토모드 찾는중 
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"Today's Song 선택")
+	}
+	
+	;================오토 모드 켜기================;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\RankPlayImage\Rank4.bmp
+	if(ErrorLevel = 0)
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		Gui,Submit,NoHide
+		GuiControl, , D, 안내문구 확인중 
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"오토 모드 선택")
+	}
+	
+	;================오토 안내 문구 확인================;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\RankPlayImage\Rank5.bmp
+	if(ErrorLevel = 0)
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		Gui,Submit,NoHide
+		GuiControl, , D, START버튼 찾는중 
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"안내 문구 확인")
+		
+		rankAutoCheck := true
+	}
+	
+	;================START 버튼 확인================;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\RankPlayImage\Rank6.bmp
+	if(ErrorLevel = 0 && rankAutoCheck = true)
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		클리어횟수 := 클리어횟수 + 1
+		Gui,Submit,NoHide
+		GuiControl, , D, 노래 진행중
+		GuiControl, , B, MacroCount: %클리어횟수% 회
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"START 버튼 클릭")
+	}
+	
+	;==================멤버 초과시=================;
+	InvenFull()
+	
+	;================결과창 - 보상 확인================;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\RankPlayImage\Rank7.bmp
+	if(ErrorLevel = 0)
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		Gui,Submit,NoHide
+		GuiControl, , D, 결과창_1		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"플레이 보상 클릭")
+	}
+	
+	;================결과창 - SCORE 확인================;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\RankPlayImage\Rank8.bmp
+	if(ErrorLevel = 0)
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		Gui,Submit,NoHide
+		GuiControl, , D, 결과창_2		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"SCORE 클릭")
+	}
+	
+	;================결과창 - Producer exp 확인================;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\RankPlayImage\Rank9.bmp
+	if(ErrorLevel = 0)
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		Gui,Submit,NoHide
+		GuiControl, , D, 결과창_3		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"Producer exp 확인")
+	}
+	
+	;================결과창 - 재시작================;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\RankPlayImage\Rank10.bmp
+	if(ErrorLevel = 0)
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		클리어횟수 := 클리어횟수 + 1
+		Gui,Submit,NoHide
+		GuiControl, , D, 노래를 재시작 합니다.
+		GuiControl, , B, MacroCount: %클리어횟수% 회
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"노래 재실행")
+	}
 	
 }
 
@@ -756,9 +964,35 @@ MissionClear()
 	}
 }
 
+StaminaControl()
+{
+	;StaminaBuy 변수로 제어 
+	;StaminaAutoBuy() 함수 제작 필요 
+	;StaminaEnd()
+}
+
+StaminaEnd()
+{
+	;===============스테미나 부족 시===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\11_SteminaEnd.bmp
+	if (ErrorLevel = 0)
+	{
+		Sleep, 1000
+			
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"스테미너 부족, 매크로 정지")
+		
+		MacroStop()
+		Gui,Submit,NoHide	
+		GuiControl, , D, -매크로 정지-
+		msgbox, 0, 안내, 스테미너가 부족합니다. 매크로가 자동 정지됩니다.,
+	}
+}
+
 MacroStop()
 {
 	soloStart := false
+	rankStart := false
 	sellStart := false
 	Gui,Submit,NoHide
 	GuiControl, , A, 정지
@@ -773,13 +1007,13 @@ CheckTime()
 	currentTime := A_TickCount			;현재 시각 받아옴  ; TickCount -> 1/1000초  ex) 5초 == 5000
 	pastTime := currentTime - testTime	; 마지막 시각으로 부터 지나간 시각 계산 
 	
-	if(pastTime >= 200000) ;200초  
+	if(pastTime >= 240000) ;4분 (240초)  
 	{
 		Gui,Submit,NoHide
 		MacroStop()
 		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 		Lv_Add("",timeLine,"프로그램 미 반응으로 인한 자동 정지.")
-		msgbox, 0, 디버깅, 마지막 클릭으로 부터 %pastTime%/1000 초 경과,3
+		msgbox, 0, 디버깅, 마지막 클릭으로 부터 %pastTime% Tick 경과,3
 		testTime := A_TickCount
 		
 		programStop := true
@@ -795,7 +1029,7 @@ BlueStackOff()
 	if (ErrorLevel = 0)
 	{
 		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
-		Lv_Add("",timeLine,"에러로 인한 블루스택 종료시퀀스 진입.")
+		Lv_Add("",timeLine,"에러로 인한 블루스택 종료.")
 		msgbox, 0, 안내,프로그램 미 반응으로 인해 10초후 프로그램 재가동... ,10
 		
 		Send {Click %FoundX% %FoundY%}
@@ -818,9 +1052,11 @@ BlueStackOn()
 	
 	IfNotExist, BlueStacks
 	{
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"블루스택 재시작.")
 		msgbox, 0,안내, 블루스택을 재실행합니다.,2
 		Run,  %A_ScriptDir%\TapSonic_B.lnk
-		Sleep, 60000
+		Sleep, 55000
 		blueStackPower := true
 		
 		Loop
@@ -830,7 +1066,10 @@ BlueStackOn()
 			{
 				Send {Click %FoundX% %FoundY%}
 				Sleep, 1000
+				timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+				Lv_Add("",timeLine,"게임 재실행 성공.")
 				soloStart := true
+				rankStart := true
 				break
 			}
 		}
@@ -841,39 +1080,51 @@ BlueStackOn()
 TestOn()
 {
 
-	
 }
 
 BackGroundClick(posX, posY)
 {
-	msgbox, 0, ,%posX%  %posY%,2
+	msgbox, 0, ,background함수 진입,
 	WinGetPos, w_x, w_y, w_w, w_h, BlueStacks
 	
-	innerX := posX
-	innerY := posY
+	innerX := posX ; - w_x
+	innerY := posY ; - w_y
 	
 	lparam := innerX|innerY<<16
-	PostMessage, 0x200, 0, %lparam%, ,BlueStacks
-	PostMessage, 0x201, 1, %lparam%, ,BlueStacks
-	PostMessage, 0x202, 0, %lparam%, ,BlueStacks
+	PostMessage, 0x201, 1, %lparam%, BlueStacksApp1, BlueStacks
+	PostMessage, 0x202, 0, %lparam%, BlueStacksApp1, BlueStacks
 	Sleep, 1000
 }
 
 CheckSerialNumber(InputSerialNumber)
 {
-	msgbox, 0, , 입력숫자 %InputSerialNumber%,
-	URLDownloadToFile, http://blogattach.naver.net/4edb52e2f7a3aa7659bedbe5d332483794c530d2cd/20180522_47_blogfile/koi1397_1526923726546_u69o35_txt/123912873.txt, SAVE.txt
+	
+	Gui,Submit,NoHide
+	;URLDownloadToFile, http://blogattach.naver.net/4edb52e2f7a3aa7659bedbe5d332483794c530d2cd/20180522_47_blogfile/koi1397_1526923726546_u69o35_txt/123912873.txt, SAVE.txt
 	FileRead,text,SAVE.txt
 	IfInString,text,%InputSerialNumber%
 	{
-		MsgBox, 0, ,시리얼넘버 확인 성공!,1
-		SerialCheck = true
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"유저 인증 성공.")
+		if(InputSerialNumber = 436347633)
+		{
+			MsgBox, 0, 안내,권오일님 환영합니다.,3
+			Gui,Submit,NoHide
+			GuiControl, , UserName, 권오일님 - 접속중
+		}
+		else if(InputSerialNumber = 4679)
+		{
+			msgbox, 0, 안내,윤승호님 환영합니다.,3
+			Gui,Submit,NoHide
+			GuiControl, , UserName, 윤승호님 - 접속중
+		}
+		serialCheck = true
 	}
 	else
 	{
-		MsgBox, 0, ,등록되지 않은 유저입니다.,
-		SerialCheck = false
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"유저 인증 실패.")
+		SoundPlay, %A_ScriptDir%\Sound\InvalidUser.mp3
+		MsgBox, 0, ,  「부정 유저입니다. 트리거를 잠급니다.」 ,
 	}
-	
-	
 }
