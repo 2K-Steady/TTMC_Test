@@ -28,6 +28,8 @@ Gui, Show
 
 global soloStart := false
 global isPlaying := false
+global rankStart := false
+
 global 클리어횟수 := 0
 global timeLine
 global CheckLevel
@@ -492,7 +494,20 @@ return
 
 ButtonRankStart:
 {
-	msgbox, 48, 고멘나사이, ※공사중※, 
+	Gui,Submit,NoHide
+	GuiControl, , A, 랭크 매크로 동작중
+	GuiControl, , D, RankStart버튼눌림
+
+	
+	timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+	Lv_Add("",timeLine,"랭크 매크로 시작")
+	
+	rankStart := true
+	
+	while(rankStart = true)
+	{
+		
+	} ;while(rankStart)
 }
 return
 
@@ -546,7 +561,10 @@ return
 
 ;============================================;
 
-
+RankPlay()
+{
+	
+}
 
 SellCharacter()
 {
@@ -817,7 +835,6 @@ BlueStackOn()
 			}
 		}
 	}
-	
 
 }
 
