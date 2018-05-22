@@ -23,7 +23,7 @@ Gui, Add, Button, x180 y220 w110 h20, 정지_F4			; 정지 버튼
 Gui, Add, Button, x180 y240 w110 h20, 종료				; 프로그램 종료 버튼
 Gui, Add, Text, x30 y260 w200 h15 vD, 현재상태: None  	; 현재 상태 확인
 
-;Gui, Add, Button, x50 y5 w100 h20, DoNotPress 			;임의기능 테스트 버튼 
+Gui, Add, Button, x50 y5 w100 h20, DoNotPress 			;임의기능 테스트 버튼 
 Gui, Show
 
 global soloStart := false
@@ -519,7 +519,7 @@ return
 
 ButtonDoNotPress:
 {
-	;BlueStackOn()
+	BlueStackOn()
 	;TestOn()
 }
 return
@@ -537,20 +537,6 @@ ExitApp
 F4::
 {
 	MacroStop()
-}
-
-F5::
-{
-	msgbox, 0, ,F5버튼클릭 확인,1
-	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_1.bmp
-	if ((ErrorLevel = 0))
-	{
-		MouseMove,%FoundX%,%FoundY%
-		Sleep, 1000
-		MouseClick,left
-		Sleep, 1000
-	}
-	
 }
 return
 
@@ -806,80 +792,18 @@ BlueStackOff()
 
 BlueStackOn()
 {
-	IfWinNotExist, BlueStacks
+	IfNotExist, BlueStacks
 	{
-		Run, C:\ProgramData\BlueStacks\Client\BlueStacks.exe
+		Run,  %A_ScriptDir%\TapSonic_B.lnk
 		Sleep, 30000
 	}
-	
-	CoordMode, Pixel, Screen
-	WinGetPos, pos_x, pos_y, width, height, BlueStacks
-	x_right := width + pos_x
-	y_bottom := height + pos_y
-	
 	blueStackPower := true
-	
-	While(programStop = false)
-	{
-		;================나의 앱 클릭===============;
-		ImageSearch, FoundX, FoundY, %pos_x%, %pos_y%, %x_right%, %y_bottom%, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_1.bmp
-		if(ErrorLevel = 0)
-		{
-			
-			msgbox, 0, ,if 진입1,1
-			MouseMove,%FoundX%,%FoundY%
-			Sleep, 1000
-			MouseClick,left
-			Sleep, 1000
-			BackGroundClick(FoundX, FoundY)
-		}
-	
-		;================탭소닉 아이콘 클릭===============;
-		ImageSearch, FoundX, FoundY, %pos_x%, %pos_y%, %x_right%, %y_bottom%, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_2.bmp
-		if(ErrorLevel = 0)
-		{
-			msgbox, 0, ,if 진입2,1
-			BackGroundClick(FoundX, FoundY)
-			
-			programStop := true
-		}
-		
-		if(Emergency = true)
-		{
-			break
-		}
-	}
 
 }
 
 TestOn()
 {
-	IfWinNotExist, BlueStacks
-	{
-		Run, C:\ProgramData\BlueStacks\Client\BlueStacks.exe
-		Sleep, 30000
-	}
-	
 
-	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_1.bmp
-	if ((ErrorLevel = 0))
-	{
-		MouseMove,%FoundX%,%FoundY%
-		Sleep, 1000
-		MouseClick,left
-		Sleep, 1000
-	}
-	
-	ImageSearch, FoundX, FoundY, 0,0, 1920, 1080, *50 %A_ScriptDir%\BlueStackOn\BlueStackOn_2.bmp
-	if ((ErrorLevel = 0))
-	{
-		MouseMove,%FoundX%,%FoundY%
-		Sleep, 1000
-		MouseClick,left
-		Sleep, 1000
-	}
-	
-	blueStackPower := true
 	
 }
 
