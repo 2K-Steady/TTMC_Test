@@ -1113,6 +1113,8 @@ MacroStop()
 	timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 	Lv_Add("",timeLine,"매크로 정지 시도")
 	
+	testTime := 9999999999
+	
 }
 
 CheckTime()
@@ -1120,7 +1122,7 @@ CheckTime()
 	currentTime := A_TickCount			;현재 시각 받아옴  ; TickCount -> 1/1000초  ex) 5초 == 5000
 	pastTime := currentTime - testTime	; 마지막 시각으로 부터 지나간 시각 계산 
 	
-	if(pastTime >= 240000) ;4분 (240초)  
+	if(pastTime >= 360000) ;4분 (240초)  
 	{
 		Gui,Submit,NoHide
 		MacroStop()
