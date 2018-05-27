@@ -386,20 +386,7 @@ SoloPlay()
 		}
 		
 		;===============스테미나 부족 시===============;
-		ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\SoloPlayImage\11_SteminaEnd.bmp
-		if ((ErrorLevel = 0) && (soloStart = true))
-		{
-			Sleep, 1000
-			
-			timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
-			Lv_Add("",timeLine,"스테미너 부족, 매크로 정지")
-			
-			soloStart := false
-			isPlaying := false
-			GuiControl, , D, -매크로 정지-
-			msgbox, 0, 안내, 스테미너가 부족합니다. 매크로가 자동 정지됩니다.,
-			
-		}
+		StaminaControl()
 
 }
 
@@ -591,8 +578,13 @@ return
 
 ButtonDoNotPress:
 {
-	BlueStackOn()
-	;TestOn()
+	
+}
+return
+
+F5::
+{
+	StaminaControl()
 }
 return
 
@@ -771,6 +763,9 @@ RankPlay()
 		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 		Lv_Add("",timeLine,"노래 재실행")
 	}
+	
+	;================스태미너 소진 시 분기점================;
+	StaminaControl()
 	
 }
 
@@ -966,10 +961,128 @@ MissionClear()
 
 StaminaControl()
 {
-	;StaminaBuy 변수로 제어 
-	;StaminaAutoBuy() 함수 제작 필요 
-	;StaminaEnd()
+	Gui,Submit,nohide
+	if(StaminaBuy = 1)
+	{
+		StaminaAutoBuy()
+	}
+	else if(StaminaBuy = 0)
+	{
+		StaminaEnd()
+	}
 }
+
+StaminaAutoBuy()
+{
+	Gui,Submit,nohide
+	global StaminaBuyEnd := false
+	;===============스테미나 부족 시===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\StaminaBuy\Stamina_1.bmp
+	if ((ErrorLevel = 0) && (StaminaBuyEnd = false))
+	{
+		FoundX := FoundX + 370
+		FoundY := FoundY + 223
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"스테미너 부족 (구매).")
+		Gui,Submit,nohide
+		GuiControl, , D, 스태미너 재구매_1
+	}
+	
+	;===============스테미나 구매_1===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\StaminaBuy\Stamina_2.bmp
+	if ((ErrorLevel = 0) && (StaminaBuyEnd = false))
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"스테미너 상품 검색중")
+		Gui,Submit,nohide
+		GuiControl, , D, 스태미너 재구매_2
+	}
+	
+	;===============스테미나 구매_2===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\StaminaBuy\Stamina_3.bmp
+	if ((ErrorLevel = 0) && (StaminaBuyEnd = false))
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"스테미너 상품 선택.")
+		Gui,Submit,nohide
+		GuiControl, , D, 스태미너 재구매_3
+	}
+	
+	;===============스테미나 구매_3===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\StaminaBuy\Stamina_4.bmp
+	if ((ErrorLevel = 0) && (StaminaBuyEnd = false))
+	{
+		FoundX := FoundX + 432
+		FoundY := FoundY + 110
+		
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 2000
+		
+		testTime := A_TickCount
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"스테미너 구매 확정.")
+		Gui,Submit,nohide
+		GuiControl, , D, 스태미너 재구매_3
+	}
+	
+	;===============스테미나 구매 확인===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *70 %A_ScriptDir%\StaminaBuy\Stamina_5.bmp
+	if ((ErrorLevel = 0) && (StaminaBuyEnd = false))
+	{
+		FoundX := FoundX + 345
+		FoundY := FoundY + 139
+		
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"스테미너 구매 확인.")
+		Gui,Submit,nohide
+		GuiControl, , D, 스태미너 재구매_4
+		
+		StaminaBuyEnd := true
+	}
+	
+	;===============상점 나가기===============;
+	ImageSearch, FoundX, FoundY, 0,0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\StaminaBuy\Stamina_6.bmp
+	if ((ErrorLevel = 0) && (StaminaBuyEnd = true))
+	{
+		Send {Click %FoundX% %FoundY%}
+		Sleep, 1000
+		
+		testTime := A_TickCount
+		
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"스테미너 구매 확인.")
+		Gui,Submit,nohide
+		GuiControl, , D, 스태미너 재구매_4
+		
+		StaminaBuyEnd := false
+	}
+	
+	
+	
+	
+}
+
 
 StaminaEnd()
 {
@@ -1106,7 +1219,7 @@ CheckSerialNumber(InputSerialNumber)
 	{
 		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
 		Lv_Add("",timeLine,"유저 인증 성공.")
-		if(InputSerialNumber = 436347633)
+		if((InputSerialNumber = 436347633) && (InputSerialNumber = 3166357722))
 		{
 			MsgBox, 0, 안내,권오일님 환영합니다.,3
 			Gui,Submit,NoHide
