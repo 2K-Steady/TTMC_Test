@@ -578,7 +578,7 @@ return
 
 ButtonDoNotPress:
 {
-	
+	TestOn()
 }
 return
 
@@ -1196,7 +1196,7 @@ BlueStackOn()
 
 TestOn()
 {
-
+	OnlineAuth()
 }
 
 BackGroundClick(posX, posY)
@@ -1213,9 +1213,33 @@ BackGroundClick(posX, posY)
 	Sleep, 1000
 }
 
+OnlineAuth()
+{
+	Driveget, SeriaID, Serial, C:\
+	Gui,Submit,NoHide
+	URLDownloadToFile,ftp://192.168.0.193:3948/SAVE.txt, %A_ScriptDir%\Authorization\Autho.txt
+	if(FileExist("Autho.txt"))
+	{
+		FileDelete, %A_ScriptDir%\Authorization\Autho.txt
+	}
+	FileRead,text,%A_ScriptDir%\Authorization\Autho.txt
+	IfInString,text,%SerialID%
+	{
+		FileDelete, %A_ScriptDir%\Authorization\Autho.txt
+		MsgBox, 0, 안내,마스터 계정으로 접속했습니다.,3
+		serialCheck = true
+	}
+	else
+	{
+		FileDelete, %A_ScriptDir%\Authorization\Autho.txt
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"유저 인증 실패.")
+		MsgBox, 0, 안내,서버에 등록되지 않은 유저입니다. 수동 인증을 시도해주세요,3
+	}
+}
+
 CheckSerialNumber(InputSerialNumber)
 {
-	
 	Gui,Submit,NoHide
 	;URLDownloadToFile, http://blogattach.naver.net/4edb52e2f7a3aa7659bedbe5d332483794c530d2cd/20180522_47_blogfile/koi1397_1526923726546_u69o35_txt/123912873.txt, SAVE.txt
 	FileRead,text,SAVE.txt
@@ -1244,4 +1268,6 @@ CheckSerialNumber(InputSerialNumber)
 		SoundPlay, %A_ScriptDir%\Sound\InvalidUser.mp3
 		MsgBox, 0, ,  「부정 유저입니다. 트리거를 잠급니다.」 ,
 	}
+	
+	
 }
