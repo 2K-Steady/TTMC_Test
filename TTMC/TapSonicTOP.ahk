@@ -15,7 +15,8 @@ Gui, Add, Edit, x335 y180 w30 h20 vRepeatCount, 0		; 반복 횟수 설정
 Gui, Add, Text, x520 y30 w100 h20, 인증 번호 입력
 Gui, Add, Edit, x520 y45 w100 h20 vInputNumber, 0 		; 시리얼 넘버 입력칸
 Gui, Add, Button, x570 y70 w50 h20, Login				; 로그인 버튼
-Gui, Add, Text, x520 y100 w100 h20 vUserName,
+Gui, Add, Button, x520 y100 w100 h30, 온라인자동인증	; 온라인 자동 인증
+Gui, Add, Text, x520 y160 w100 h20 vUserName,
 
 Gui, Add, Checkbox, x400 y180 w110 h20 vCheckLevel, LevelMAX 무시	; 솔로 카운트 제어
 Gui, Add, Checkbox, x400 y200 w120 h20 vStaminaBuy, Stamina 자동구매
@@ -483,6 +484,13 @@ ButtonLogin:
 		return
 	}
 	CheckSerialNumber(InputSerialNumber)
+}
+return
+
+Button온라인자동인증:
+{
+	msgbox, 0, 안내, 버그 수정중,
+	;OnlineAuth()
 }
 return
 
@@ -1196,28 +1204,20 @@ BlueStackOn()
 
 TestOn()
 {
-	OnlineAuth()
+	
+	;URLDownloadToFile, ftp://tokui.tplinkdns.com:3948/Notification/Notification.txt, %A_ScriptDir%\Authorization\Autho.txt
 }
 
-BackGroundClick(posX, posY)
+BackGroundClick()
 {
-	msgbox, 0, ,background함수 진입,
-	WinGetPos, w_x, w_y, w_w, w_h, BlueStacks
-	
-	innerX := posX ; - w_x
-	innerY := posY ; - w_y
-	
-	lparam := innerX|innerY<<16
-	PostMessage, 0x201, 1, %lparam%, BlueStacksApp1, BlueStacks
-	PostMessage, 0x202, 0, %lparam%, BlueStacksApp1, BlueStacks
-	Sleep, 1000
+
 }
 
 OnlineAuth()
 {
-	Driveget, SeriaID, Serial, C:\
+	Driveget, SerialID, Serial, C:\
 	Gui,Submit,NoHide
-	URLDownloadToFile,ftp://192.168.0.193:3948/SAVE.txt, %A_ScriptDir%\Authorization\Autho.txt
+	URLDownloadToFile, ftp://tokui.tplinkdns.com:3948/Authorization/SAVE.txt, %A_ScriptDir%\Authorization\Autho.txt
 	if(FileExist("Autho.txt"))
 	{
 		FileDelete, %A_ScriptDir%\Authorization\Autho.txt
@@ -1225,8 +1225,21 @@ OnlineAuth()
 	FileRead,text,%A_ScriptDir%\Authorization\Autho.txt
 	IfInString,text,%SerialID%
 	{
+		timeLine := "[" A_YYYY "." A_MM "." A_DD ". " A_Hour ":" A_Min ":" A_Sec "]"
+		Lv_Add("",timeLine,"유저 인증 성공.")
 		FileDelete, %A_ScriptDir%\Authorization\Autho.txt
-		MsgBox, 0, 안내,마스터 계정으로 접속했습니다.,3
+		if((SerialID = 436347633) && (SerialID = 3166357722))
+		{
+			MsgBox, 0, 안내,마스터 계정으로 접속했습니다.,3
+			Gui,Submit,NoHide
+			GuiControl, , UserName, Master Connect
+		}
+		else if(SerialID = 168615187)
+		{
+			msgbox, 0, 안내,윤승호님 환영합니다.,3
+			Gui,Submit,NoHide
+			GuiControl, , UserName, 윤승호님 - 접속중
+		}
 		serialCheck = true
 	}
 	else
@@ -1241,7 +1254,6 @@ OnlineAuth()
 CheckSerialNumber(InputSerialNumber)
 {
 	Gui,Submit,NoHide
-	;URLDownloadToFile, http://blogattach.naver.net/4edb52e2f7a3aa7659bedbe5d332483794c530d2cd/20180522_47_blogfile/koi1397_1526923726546_u69o35_txt/123912873.txt, SAVE.txt
 	FileRead,text,SAVE.txt
 	IfInString,text,%InputSerialNumber%
 	{
