@@ -1,5 +1,5 @@
 ﻿
-Gui, Add, Text, x180 y5 w200 h20, TTMC Test ver.180523		; 프로그램 제목
+Gui, Add, Text, x180 y5 w200 h20, TTMC Test ver.180528		; 프로그램 제목
 Gui, Add, Text, x380 y260 w130 h15, Made by: KinKan_Lab		; --
 
 Gui, Add, Picture ,x20 y26 w150 h150, %A_ScriptDir%\TTMC_Icon.ico
@@ -1076,6 +1076,7 @@ StaminaAutoBuy()
 		GuiControl, , D, 스태미너 재구매_4
 		
 		StaminaBuyEnd := false
+		isPlaying := false
 	}
 	
 	
@@ -1107,6 +1108,7 @@ MacroStop()
 	soloStart := false
 	rankStart := false
 	sellStart := false
+	isplaying := false
 	Gui,Submit,NoHide
 	GuiControl, , A, 정지
 	GuiControl, , D, 현재상태: 정지
