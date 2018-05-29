@@ -1195,6 +1195,7 @@ BlueStackOn()
 				Lv_Add("",timeLine,"게임 재실행 성공.")
 				soloStart := true
 				rankStart := true
+				isPlaying := false
 				break
 			}
 		}
